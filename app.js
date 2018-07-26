@@ -12,14 +12,16 @@ app.set("view engine", "ejs");
 
 var campgroundSchema = new mongoose.Schema({
 	name: String,
-	image: String
+	image: String,
+	description: String
 });
 
 var Campground = mongoose.model("Campground", campgroundSchema);
 
 // Campground.create({
 // 	name: "Granite Hill", 
-// 	image: "https://images.unsplash.com/photo-1471115853179-bb1d604434e0?ixlib=rb-0.3.5&s=dd23e6038cd7a8421453675bd5695062&auto=format&fit=crop&w=959&q=80"
+// 	image: "https://images.unsplash.com/photo-1471115853179-bb1d604434e0?ixlib=rb-0.3.5&s=dd23e6038cd7a8421453675bd5695062&auto=format&fit=crop&w=959&q=80",
+// 	description: "This is a huge granite hill, no bathrooms. No water. Beautiful granite!"
 // 	}, 
 // 	function(err, campground){
 // 		if(err){
@@ -46,22 +48,25 @@ app.get("/", function(req, res){
 	res.render("landing");
 });
 
+// INDEX - Show all campgrounds
 app.get("/campgrounds", function(req, res){
 	// Get all campgrounds fron DB
 	Campground.find({}, function(err, campgrounds){
 		if(err){
 			console.log(err);
 		} else {
-			res.render("campgrounds", {campgrounds: campgrounds});
+			res.render("index", {campgrounds: campgrounds});
 		}
 	});
 });
 
+// CREATE - Add new campground to DB
 app.post("/campgrounds", function(req, res){
 	// Get data from form and add to campgrounds array
 	var name = req.body.name;
 	var image = req.body.image;
-	var newCampground = {name: name, image: image};
+	var desc = req.body.description;
+	var newCampground = {name: name, image: image, description: desc};
 	// Create a new campground and save to DB
 	Campground.create(newCampground, function(err, campground){
 		if(err){
@@ -73,8 +78,22 @@ app.post("/campgrounds", function(req, res){
 	});
 });
 
+// NEW - Show form to create new campground
 app.get("/campgrounds/new", function(req, res){
 	res.render("new");
+});
+
+// SHOW - Shows more info about one campground
+app.get("/campgrounds/:id", function(req, res){
+	// Find the campground with provided ID
+	Campground.findById(req.params.id, function(err, foundCampground){
+		if(err){
+			console.log(err);
+		} else {
+			// render show template with that campground
+			res.render("show", {campground: foundCampground});
+		}
+	});
 });
 
 http.listen(3000, function(){
